@@ -1,0 +1,6 @@
+[submodule "external/mdns"]
+	path = external/mdns
+	url = https://github.com/mjansson/mdns.git
+[submodule "external/fmt"]
+	path = external/fmt
+	url = https://github.com/fmtlib/fmt.git
