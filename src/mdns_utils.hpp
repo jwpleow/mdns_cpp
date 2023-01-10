@@ -7,7 +7,8 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <iostream>
+
+#include "log.hpp"
 
 #ifdef _WIN32
 #include <Ws2tcpip.h>
@@ -26,7 +27,8 @@
 namespace mdns_cpp
 {
 
-// copypasta from mdns.c
+// 99% of the code below are copypasta from mdns.c
+
 enum
 {
     IFF_UP = 0x1,		/* Interface is up.  */
@@ -113,7 +115,6 @@ inline std::string IPAddressToString(const sockaddr *addr, size_t addrlen) {
   return IPV4AddressToString((const struct sockaddr_in *)addr, addrlen);
 }
 
-// taken from mdns.c
 inline std::vector<int> OpenClientSockets(int port) {
     std::vector<int> sockets;
 	// When sending, each socket can only send to one network interface
@@ -142,7 +143,7 @@ inline std::vector<int> OpenClientSockets(int port) {
 
 	if (!adapter_address || (ret != NO_ERROR)) {
         adapter_address.reset();
-		printf("Failed to get network adapter addresses\n");
+		Log(LogLevel::Warn, "Failed to get network adapter addresses");
 		return num_sockets;
 	}
 
@@ -180,9 +181,8 @@ inline std::vector<int> OpenClientSockets(int port) {
                     }
 			
 					if (log_addr) {
-						const auto addr = IPV4AddressToString(saddr,
-						                                            sizeof(struct sockaddr_in));
-                        std::cout << "Local IPv4 address: " << addr << "\n";
+						const auto addr = IPV4AddressToString(saddr, sizeof(struct sockaddr_in));
+                        Log(LogLevel::Debug, "Socket opened for interface with local IPv6 address: " + addr);
 					}
 				}
 			} else if (unicast->Address.lpSockaddr->sa_family == AF_INET6) {
@@ -215,9 +215,8 @@ inline std::vector<int> OpenClientSockets(int port) {
                     }
 			
 					if (log_addr) {
-						const auto addr = IPV6AddressToString(saddr,
-						                                            sizeof(struct sockaddr_in6));
-						std::cout << "Local IPv6 address: " << addr << "\n";
+						const auto addr = IPV6AddressToString(saddr, sizeof(struct sockaddr_in6));
+						Log(LogLevel::Debug, "Socket opened for interface with local IPv6 address: " + addr);
 					}
 				}
 			}
@@ -231,7 +230,7 @@ inline std::vector<int> OpenClientSockets(int port) {
 	struct ifaddrs* ifa = 0;
 
 	if (getifaddrs(&ifaddr) < 0) {
-		std::cout << "Unable to get interface addresses\n";
+		Log(LogLevel::Warn, "Unable to get interface addresses");
     }
 
 	int first_ipv4 = 1;
@@ -264,7 +263,7 @@ inline std::vector<int> OpenClientSockets(int port) {
                 }
 				if (log_addr) {
                     const auto addr = IPV4AddressToString(saddr, sizeof(struct sockaddr_in));
-                    std::cout << "Local IPv4 address: " <<  addr << "\n";
+                    Log(LogLevel::Debug, "Socket opened for interface with local IPv4 address: " + addr);
 				}
 			}
 		} else if (ifa->ifa_addr->sa_family == AF_INET6) {
@@ -297,7 +296,7 @@ inline std::vector<int> OpenClientSockets(int port) {
 	
 				if (log_addr) {
 					const auto addr = IPV6AddressToString(saddr, sizeof(struct sockaddr_in6));
-                    std::cout << "Local IPv6 address: " << addr << "\n";
+                    Log(LogLevel::Debug, "Socket opened for interface with local IPv6 address: " + addr);
 				}
 			}
 		}
@@ -336,9 +335,7 @@ inline int QueryCallback(int sock, const struct sockaddr* from, size_t addrlen,
 		const mdns_string_t namestr = mdns_record_parse_ptr(data, size, record_offset, record_length,
 		                                              namebuffer, sizeof(namebuffer));
 
-		domainPtrRecord.name_string = std::string(namestr.str, namestr.length);		
-		
-        // std::cout << "PTR Name string: " << domainPtrRecord.name_string << "\n";
+		domainPtrRecord.name_string = std::string(namestr.str, namestr.length);
 		*recordOut = std::move(domainPtrRecord);
 	} else if (rtype == MDNS_RECORDTYPE_SRV) {
 		auto srvRecord = ServiceRecord();
@@ -348,8 +345,7 @@ inline int QueryCallback(int sock, const struct sockaddr* from, size_t addrlen,
 		const mdns_record_srv_t srv = mdns_record_parse_srv(data, size, record_offset, record_length,
 		                                              namebuffer, sizeof(namebuffer));
 		srvRecord.service_name = std::string(srv.name.str, srv.name.length);
-  
-        // std::cout << "SRV string: " << srvRecord.service_name << "\n";
+
 		*recordOut = std::move(srvRecord);
 	} else if (rtype == MDNS_RECORDTYPE_A) {
 		auto aRecord = ARecord();
@@ -358,7 +354,6 @@ inline int QueryCallback(int sock, const struct sockaddr* from, size_t addrlen,
 		struct sockaddr_in addr;
 		mdns_record_parse_a(data, size, record_offset, record_length, &addr);
 		aRecord.address_string = IPV4AddressToString(&addr, sizeof(addr));
-        std::cout << "A type: " << aRecord.address_string << "\n";
 
 		*recordOut = std::move(aRecord);
 	} else if (rtype == MDNS_RECORDTYPE_AAAA) {
@@ -368,7 +363,6 @@ inline int QueryCallback(int sock, const struct sockaddr* from, size_t addrlen,
 		struct sockaddr_in6 addr;
 		mdns_record_parse_aaaa(data, size, record_offset, record_length, &addr);
         aaaaRecord.address_string = IPV6AddressToString(&addr, sizeof(addr));
-        // std::cout << "AAAA type: " << aaaaRecord.address_string << "\n";
 
 		*recordOut = std::move(aaaaRecord);
 	} else if (rtype == MDNS_RECORDTYPE_TXT) {

@@ -19,10 +19,27 @@ std::string ToString(EntryType entry)
     return "";
 }
 
+bool operator==(const RecordHeader& lhs, const RecordHeader& rhs)
+{
+    return lhs.ip_address == rhs.ip_address
+        && lhs.entry_type == rhs.entry_type
+        && lhs.entry_string == rhs.entry_string
+        && lhs.record_type == rhs.record_type
+        && lhs.rclass == rhs.rclass
+        && lhs.ttl == rhs.ttl
+        && lhs.record_length == rhs.record_length;
+}
+
 std::ostream& operator<<(std::ostream& os, const RecordHeader& header)
 {
     os << fmt::format("{} : {} {}", header.ip_address, ToString(header.entry_type), header.entry_string);
     return os;
+}
+
+bool operator==(const DomainNamePointerRecord& lhs, const DomainNamePointerRecord& rhs)
+{
+    return lhs.header == rhs.header
+        && lhs.name_string == rhs.name_string;
 }
 
 std::ostream& operator<<(std::ostream& os, const DomainNamePointerRecord& record)
@@ -35,6 +52,15 @@ std::ostream& operator<<(std::ostream& os, const DomainNamePointerRecord& record
     return os;
 }
 
+bool operator==(const ServiceRecord& lhs, const ServiceRecord& rhs)
+{
+    return lhs.header == rhs.header
+        && lhs.service_name == rhs.service_name
+        && lhs.priority == rhs.priority
+        && lhs.weight == rhs.weight
+        && lhs.port == rhs.port;
+}
+
 std::ostream& operator<<(std::ostream& os, const ServiceRecord& record)
 {
     // printf("%.*s : %s %.*s SRV %.*s priority %d weight %d port %d\n",
@@ -42,6 +68,12 @@ std::ostream& operator<<(std::ostream& os, const ServiceRecord& record)
     //        MDNS_STRING_FORMAT(srv.name), srv.priority, srv.weight, srv.port);
     os << fmt::format("{} SRV {} priority {} weight {} port {}", record.header, record.service_name, record.priority, record.weight, record.port);
     return os;
+}
+
+bool operator==(const ARecord& lhs, const ARecord& rhs)
+{
+    return lhs.header == rhs.header
+        && lhs.address_string == rhs.address_string;
 }
 
 std::ostream& operator<<(std::ostream& os, const ARecord& record)
@@ -52,12 +84,24 @@ std::ostream& operator<<(std::ostream& os, const ARecord& record)
     return os;
 }
 
+bool operator==(const AAAARecord& lhs, const AAAARecord& rhs)
+{
+    return lhs.header == rhs.header
+        && lhs.address_string == rhs.address_string;
+}
+
 std::ostream& operator<<(std::ostream& os, const AAAARecord& record)
 {
     // printf("%.*s : %s %.*s AAAA %.*s\n", MDNS_STRING_FORMAT(fromaddrstr), entrytype,
     //        MDNS_STRING_FORMAT(entrystr), MDNS_STRING_FORMAT(addrstr));
     os << fmt::format("{} AAAA {}", record.header, record.address_string);
     return os;
+}
+
+bool operator==(const TXTRecord& lhs, const TXTRecord& rhs)
+{
+    return lhs.header == rhs.header
+        && lhs.txt == rhs.txt;
 }
 
 std::ostream& operator<<(std::ostream& os, const TXTRecord& record)
@@ -69,6 +113,11 @@ std::ostream& operator<<(std::ostream& os, const TXTRecord& record)
     // TODO: improve this
     os << fmt::format("{} TXT {}", record.header, record.txt);
     return os;
+}
+
+bool operator==(const AnyRecord& lhs, const AnyRecord& rhs)
+{
+    return lhs.header == rhs.header;
 }
 
 std::ostream& operator<<(std::ostream& os, const AnyRecord& record)

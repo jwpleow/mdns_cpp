@@ -40,6 +40,7 @@ struct RecordHeader {
     std::uint32_t ttl; // Time interval (in seconds?) that the RR should be cached
     std::size_t record_length;
 };
+bool operator==(const RecordHeader& lhs, const RecordHeader& rhs);
 std::ostream& operator<<(std::ostream& os, const RecordHeader& header);
 
 struct DomainNamePointerRecord {
@@ -47,6 +48,7 @@ struct DomainNamePointerRecord {
 
     std::string name_string; // examples: "_http._tcp.local.", "_teamviewer._tcp.local."
 };
+bool operator==(const DomainNamePointerRecord& lhs, const DomainNamePointerRecord& rhs);
 std::ostream& operator<<(std::ostream& os, const DomainNamePointerRecord& record);
 
 struct ServiceRecord {
@@ -57,6 +59,7 @@ struct ServiceRecord {
 	std::uint16_t weight;
 	std::uint16_t port;
 };
+bool operator==(const ServiceRecord& lhs, const ServiceRecord& rhs);
 std::ostream& operator<<(std::ostream& os, const ServiceRecord& record);
 
 struct ARecord {
@@ -64,6 +67,7 @@ struct ARecord {
 
     std::string address_string;
 };
+bool operator==(const ARecord& lhs, const ARecord& rhs);
 std::ostream& operator<<(std::ostream& os, const ARecord& record);
 
 struct AAAARecord {
@@ -71,6 +75,7 @@ struct AAAARecord {
 
     std::string address_string;
 };
+bool operator==(const AAAARecord& lhs, const AAAARecord& rhs);
 std::ostream& operator<<(std::ostream& os, const AAAARecord& record);
 
 struct TXTRecord {
@@ -79,11 +84,13 @@ struct TXTRecord {
     // Can keys be repeated? Should I just use an unordered_map?
     std::vector<std::pair<std::string, std::string>> txt;
 };
+bool operator==(const TXTRecord& lhs, const TXTRecord& rhs);
 std::ostream& operator<<(std::ostream& os, const TXTRecord& record);
 
 struct AnyRecord {
     RecordHeader header;
 };
+bool operator==(const AnyRecord& lhs, const AnyRecord& rhs);
 std::ostream& operator<<(std::ostream& os, const AnyRecord& record);
 
 using Record = std::variant<DomainNamePointerRecord,
@@ -93,16 +100,6 @@ using Record = std::variant<DomainNamePointerRecord,
                             TXTRecord,
                             AnyRecord>;
 std::ostream& operator<<(std::ostream& os, const Record& record);
-
-enum class LogLevel
-{
-    Debug = 0,
-    Info = 1,
-    Warn = 2,
-    Error = 3
-};
-
-using LoggerCallback = std::function<void(LogLevel, std::string&&)>;
 
 
 }

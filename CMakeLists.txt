@@ -8,7 +8,7 @@ add_subdirectory(external/mdns)
 add_subdirectory(external/fmt)
 
 add_library(mdns_cpp
-  src/mdns.cpp
+  src/service_discovery.cpp
   src/types.cpp
 )
 add_library(mdns_cpp::mdns_cpp ALIAS mdns_cpp)
