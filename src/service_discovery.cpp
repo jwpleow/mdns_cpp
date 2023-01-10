@@ -35,7 +35,7 @@ std::vector<Record> RunServiceDiscovery()
 	do {
 		struct timeval timeout;
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 1000; // Seems to need at least 1ms to discover stuff
+		timeout.tv_usec = 5000; // With ~1ms, it can still sometimes miss some?
 
 		int nfds = 0;
 		fd_set readfs;
@@ -67,9 +67,6 @@ std::vector<Record> RunServiceDiscovery()
 		mdns_socket_close(sockets[isock]);
     }
 	Log(LogLevel::Debug, "Closed sockets.");
-
-	// Remove repeated records
-	recordsOut.erase(std::unique(recordsOut.begin(), recordsOut.end()), recordsOut.end());
 
     return recordsOut;
 }   

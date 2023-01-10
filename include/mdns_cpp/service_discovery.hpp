@@ -9,6 +9,7 @@ namespace mdns_cpp
 {
 
 // DNS-SD
+// Note: might return repeated records
 std::vector<Record> RunServiceDiscovery();
 
 }

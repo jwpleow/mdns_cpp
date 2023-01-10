@@ -32,7 +32,7 @@ bool operator==(const RecordHeader& lhs, const RecordHeader& rhs)
 
 std::ostream& operator<<(std::ostream& os, const RecordHeader& header)
 {
-    os << fmt::format("{} : {} {}", header.ip_address, ToString(header.entry_type), header.entry_string);
+    os << fmt::format("{} : {} {} record_type {} rclass {:#x} ttl {} record_length {}", header.ip_address, ToString(header.entry_type), header.entry_string, header.record_type, header.rclass, header.ttl, header.record_length);
     return os;
 }
 
@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& os, const DomainNamePointerRecord& record
     //  printf("%.*s : %s %.*s PTR %.*s rclass 0x%x ttl %u length %d\n",
     //        MDNS_STRING_FORMAT(fromaddrstr), entrytype, MDNS_STRING_FORMAT(entrystr),
     //        MDNS_STRING_FORMAT(namestr), rclass, ttl, (int)record_length);
-    os << fmt::format("{} PTR {} rclass {:#x} ttl {} length {}", record.header, record.name_string, record.header.rclass, record.header.ttl, record.header.record_length);
+    os << fmt::format("{} PTR {}", record.header, record.name_string);
     return os;
 }
 
@@ -125,7 +125,7 @@ std::ostream& operator<<(std::ostream& os, const AnyRecord& record)
     // printf("%.*s : %s %.*s type %u rclass 0x%x ttl %u length %d\n",
     //        MDNS_STRING_FORMAT(fromaddrstr), entrytype, MDNS_STRING_FORMAT(entrystr), rtype,
     //        rclass, ttl, (int)record_length);
-    os << fmt::format("{} type {} rclass {:#x} ttl {} length {}", record.header, record.header.record_type, record.header.rclass, record.header.ttl, record.header.record_length);
+    os << fmt::format("{}", record.header);
     return os; 
 }
 
