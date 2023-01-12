@@ -15,7 +15,7 @@ enum class LogLevel
     Error = 3
 };
 
-void Log(LogLevel level, std::string_view string) {
+inline void Log(LogLevel level, std::string_view string) {
     // replace with your logger here
     std::cout << string << "\n";
 }

@@ -7,9 +7,11 @@
 namespace mdns_cpp
 {
 
+// Mostly from send_dns_sd()
 std::vector<Record> RunServiceDiscovery()
 {
-    std::vector<int> sockets = OpenClientSockets(0);
+	const auto openedSocketData = OpenClientSockets(0);
+    const std::vector<int>& sockets = openedSocketData.sockets;
     const int num_sockets = static_cast<int>(sockets.size());
 	if (sockets.empty()) {
 		Log(LogLevel::Error, "Failed to open any client sockets");
@@ -47,7 +49,7 @@ std::vector<Record> RunServiceDiscovery()
 		}
 
 		num_records = 0;
-		numberOfReadyDescriptors = select(nfds, &readfs, 0, 0, &timeout);
+		numberOfReadyDescriptors = select(nfds, &readfs, nullptr, nullptr, &timeout);
 		if (numberOfReadyDescriptors > 0) {
 			for (int isock = 0; isock < num_sockets; ++isock) {
 				if (FD_ISSET(sockets[isock], &readfs)) {

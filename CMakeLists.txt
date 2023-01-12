@@ -7,8 +7,11 @@ option(BUILD_EXAMPLE "" ON)
 add_subdirectory(external/mdns)
 add_subdirectory(external/fmt)
 
+find_package(Threads REQUIRED)
+
 add_library(mdns_cpp
   src/service_discovery.cpp
+  src/mdns_service.cpp
   src/types.cpp
 )
 add_library(mdns_cpp::mdns_cpp ALIAS mdns_cpp)
@@ -23,6 +26,7 @@ PUBLIC
 PRIVATE
   mdns::mdns
   fmt::fmt
+  Threads::Threads
 )
 
 target_compile_features(mdns_cpp PUBLIC cxx_std_17)

@@ -32,13 +32,13 @@ std::string ToString(EntryType entry);
 
 struct RecordHeader {
     std::string ip_address; // Possibly including port 
-    EntryType entry_type;
+    EntryType entry_type{EntryType::UNKNOWN};
     std::string entry_string; // example: "_services._dns-sd._udp.local."
 
-    std::uint16_t record_type; // Value may not be in RecordType!
-    std::uint16_t rclass;
-    std::uint32_t ttl; // Time interval (in seconds?) that the RR should be cached
-    std::size_t record_length;
+    std::uint16_t record_type{255}; // Value may not be in RecordType!
+    std::uint16_t rclass{0};
+    std::uint32_t ttl{10}; // Time interval (in seconds?) that the RR should be cached
+    std::size_t record_length{0};
 };
 bool operator==(const RecordHeader& lhs, const RecordHeader& rhs);
 std::ostream& operator<<(std::ostream& os, const RecordHeader& header);

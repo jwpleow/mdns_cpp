@@ -15,6 +15,7 @@ std::string ToString(EntryType entry)
         case EntryType::ANSWER: return "answer";
         case EntryType::AUTHORITY: return "authority";
         case EntryType::ADDITIONAL: return "additional";
+        case EntryType::UNKNOWN: return "unknown";
     }
     return "";
 }
