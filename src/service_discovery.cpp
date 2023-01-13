@@ -36,8 +36,8 @@ std::vector<Record> RunServiceDiscovery()
 	Log(LogLevel::Info, "Reading DNS-SD replies.");
 	do {
 		struct timeval timeout;
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 5000; // With ~1ms, it can still sometimes miss some?
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0; // With ~1ms, it can still sometimes miss some?
 
 		int nfds = 0;
 		fd_set readfs;
