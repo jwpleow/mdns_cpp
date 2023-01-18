@@ -131,6 +131,9 @@ public:
 
 	void Start()
 	{
+#ifdef _WIN32
+		WinsockManager::Init();
+#endif
 		Log(LogLevel::Debug, "mDNS Service Start called.");
 		if (m_running.exchange(true, std::memory_order_acq_rel) == true) {
 			Log(LogLevel::Info, "mDNS Service already started.");
