@@ -26,7 +26,7 @@ struct ServiceData
 	ServiceRecord record_service;
 	ARecord record_a;
 	AAAARecord record_aaaa;
-	std::vector<mdns_record_t> txt_records;
+	TXTRecord record_txt;
 };
 
 class mDNSService::ServiceImpl
@@ -88,6 +88,9 @@ public:
 		m_serviceData.record_aaaa.header.entry_string = m_serviceData.hostname_qualified;
 		m_serviceData.record_aaaa.address_string = IPV6AddressToString(&m_serviceData.sockets_data.service_address_ipv6, sizeof(struct sockaddr_in));
 
+		// TXT record
+		m_serviceData.record_txt.header.entry_string = m_serviceData.service;
+
 		// create data struct for calls to the mdns lib
 		m_serviceDataForMdns.service = Convert(m_serviceData.service);
 		m_serviceDataForMdns.hostname = Convert(m_serviceData.hostname);
@@ -104,6 +107,8 @@ public:
 		m_serviceDataForMdns.record_a.data.a.addr = m_serviceData.sockets_data.service_address_ipv4;
 		m_serviceDataForMdns.record_aaaa = Convert(m_serviceData.record_aaaa);
 		m_serviceDataForMdns.record_aaaa.data.aaaa.addr = m_serviceData.sockets_data.service_address_ipv6;
+	
+		m_serviceDataForMdns.records_txt = Convert(m_serviceData.record_txt);
 	}
 
 	~ServiceImpl() {

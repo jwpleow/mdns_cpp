@@ -104,16 +104,25 @@ inline std::vector<mdns_record_t> Convert(const TXTRecord& recordIn)
     //                                         .rclass = 0,
     //                                         .ttl = 0};
     std::vector<mdns_record_t> recordsOut;
-    for (const auto& txtpair : recordIn.txt) {
+    if (recordIn.txt.empty()) {
         mdns_record_t rec;
         rec.name = Convert(recordIn.header.entry_string);
         rec.type = MDNS_RECORDTYPE_TXT;
-        rec.data.txt.key = Convert(txtpair.first);
-        rec.data.txt.value = Convert(txtpair.second);
         rec.rclass = recordIn.header.rclass;
         rec.ttl = recordIn.header.ttl;
+        recordsOut.push_back(rec);
+    } else {
+        for (const auto& txtpair : recordIn.txt) {
+            mdns_record_t rec;
+            rec.name = Convert(recordIn.header.entry_string);
+            rec.type = MDNS_RECORDTYPE_TXT;
+            rec.data.txt.key = Convert(txtpair.first);
+            rec.data.txt.value = Convert(txtpair.second);
+            rec.rclass = recordIn.header.rclass;
+            rec.ttl = recordIn.header.ttl;
+        }
     }
-
+    
     return recordsOut;
 }
 

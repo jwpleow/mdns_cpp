@@ -84,7 +84,7 @@ struct service_t {
 	mdns_record_t record_srv;
 	mdns_record_t record_a;
 	mdns_record_t record_aaaa;
-	std::vector<mdns_record_t> txt_records;
+	std::vector<mdns_record_t> records_txt;
 };
 
 inline mdns_cpp::EntryType ParseEntryType(mdns_entry_type old_entry_type) {
@@ -553,7 +553,7 @@ inline int ServiceCallback(int sock, const struct sockaddr* from, size_t addrlen
 
 			// Add TXT records for our service instance name, will be coalesced into
 			// one record with both key-value pair strings by the library
-			additional.insert(additional.end(), service->txt_records.begin(), service->txt_records.end());
+			additional.insert(additional.end(), service->records_txt.begin(), service->records_txt.end());
 
 			// Send the answer, unicast or multicast depending on flag in query
 			uint16_t unicast = (rclass & MDNS_UNICAST_RESPONSE);
@@ -591,7 +591,7 @@ inline int ServiceCallback(int sock, const struct sockaddr* from, size_t addrlen
 
 			// Add TXT records for our service instance name, will be coalesced into
 			// one record with both key-value pair strings by the library
-			additional.insert(additional.end(), service->txt_records.begin(), service->txt_records.end());
+			additional.insert(additional.end(), service->records_txt.begin(), service->records_txt.end());
 
 			// Send the answer, unicast or multicast depending on flag in query
 			uint16_t unicast = (rclass & MDNS_UNICAST_RESPONSE);
@@ -625,7 +625,7 @@ inline int ServiceCallback(int sock, const struct sockaddr* from, size_t addrlen
 
 			// Add TXT records for our service instance name, will be coalesced into
 			// one record with both key-value pair strings by the library
-			additional.insert(additional.end(), service->txt_records.begin(), service->txt_records.end());
+			additional.insert(additional.end(), service->records_txt.begin(), service->records_txt.end());
 
 			// Send the answer, unicast or multicast depending on flag in query
 			uint16_t unicast = (rclass & MDNS_UNICAST_RESPONSE);
@@ -660,7 +660,7 @@ inline int ServiceCallback(int sock, const struct sockaddr* from, size_t addrlen
 
 			// Add TXT records for our service instance name, will be coalesced into
 			// one record with both key-value pair strings by the library
-			additional.insert(additional.end(), service->txt_records.begin(), service->txt_records.end());
+			additional.insert(additional.end(), service->records_txt.begin(), service->records_txt.end());
 
 			// Send the answer, unicast or multicast depending on flag in query
 			uint16_t unicast = (rclass & MDNS_UNICAST_RESPONSE);
