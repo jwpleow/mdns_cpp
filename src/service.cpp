@@ -1,4 +1,4 @@
-#include "mdns_cpp/mdns_service.hpp"
+#include "mdns_cpp/service.hpp"
 #include "mdns_cpp/types.hpp"
 #include "mdns_utils.hpp"
 #include "types_utils.hpp"
@@ -29,9 +29,10 @@ struct ServiceData
 	TXTRecord record_txt;
 };
 
-class mDNSService::ServiceImpl
+class Service::ServiceImpl
 {
 private:
+	ServiceSettings m_serviceSettings;
 	ServiceData m_serviceData;
 	service_t m_serviceDataForMdns;
 
@@ -39,9 +40,24 @@ private:
 	std::thread m_listenThread;
 
 public:
-	ServiceImpl(Service service)
+	ServiceImpl(ServiceSettings settings)
 	{
-		if (service.service_name.empty()) {
+		SetSettings(std::move(settings));
+	}
+
+	~ServiceImpl() 
+	{
+		Stop();
+	}
+
+	void SetSettings(ServiceSettings settings)
+	{
+		m_serviceSettings = std::move(settings);
+	}
+
+	void OpenSockets()
+	{
+		if (m_serviceSettings.service_name.empty()) {
 			Log(LogLevel::Error, "Empty service name.");
 			throw std::runtime_error("Empty service name.");
 		}
@@ -53,11 +69,13 @@ public:
 			throw std::runtime_error("Failed to open any client sockets.");
 		}
 		Log(LogLevel::Info, fmt::format("Opened {} socket{} for mDNS Service.", num_sockets, num_sockets > 1 ? "s": ""));
+	}
 
-
-		m_serviceData.port = service.port;
-		m_serviceData.hostname = service.hostname;
-		m_serviceData.service = service.service_name;
+	void SetupData() 
+	{
+		m_serviceData.port = m_serviceSettings.port;
+		m_serviceData.hostname = m_serviceSettings.hostname;
+		m_serviceData.service = m_serviceSettings.service_name;
 		if (m_serviceData.service.back() != '.') {
 			m_serviceData.service += '.';
 		}
@@ -111,10 +129,6 @@ public:
 		m_serviceDataForMdns.records_txt = Convert(m_serviceData.record_txt);
 	}
 
-	~ServiceImpl() {
-		Stop();
-	}
-
 	void Start()
 	{
 		Log(LogLevel::Debug, "mDNS Service Start called.");
@@ -122,6 +136,9 @@ public:
 			Log(LogLevel::Info, "mDNS Service already started.");
 			return;
 		}
+
+		OpenSockets();
+		SetupData();
 
 		// Send an announcement on startup of service
 		{
@@ -136,8 +153,8 @@ public:
 			}
 
 			std::array<char, 2048> buffer;
-			for (std::size_t isock = 0; isock < m_serviceData.sockets_data.sockets.size(); ++isock) {
-				mdns_announce_multicast(m_serviceData.sockets_data.sockets[isock], buffer.data(), buffer.size(), m_serviceDataForMdns.record_ptr, 0, 0, additional.data(), additional.size());
+			for (const auto& socket : m_serviceData.sockets_data.sockets) {
+				mdns_announce_multicast(socket, buffer.data(), buffer.size(), m_serviceDataForMdns.record_ptr, nullptr, 0, additional.data(), additional.size());
 			}
 		}
 
@@ -172,17 +189,21 @@ public:
 
 			std::array<char, 2048> buffer;
 
-			for (std::size_t isock = 0; isock < m_serviceData.sockets_data.sockets.size(); ++isock) {
-				mdns_goodbye_multicast(m_serviceData.sockets_data.sockets[isock], buffer.data(), buffer.size(), m_serviceDataForMdns.record_ptr, 0, 0, additional.data(), additional.size());
+			for (const auto& socket : m_serviceData.sockets_data.sockets) {
+				mdns_goodbye_multicast(socket, buffer.data(), buffer.size(), m_serviceDataForMdns.record_ptr, nullptr, 0, additional.data(), additional.size());
 			}
 		}
 
-		for (std::size_t isock = 0; isock < m_serviceData.sockets_data.sockets.size(); ++isock) {
-			mdns_socket_close(m_serviceData.sockets_data.sockets[isock]);
+		for (const auto& socket : m_serviceData.sockets_data.sockets) {
+			mdns_socket_close(socket);
 		}
 		m_serviceData.sockets_data.sockets.clear();
 
 		Log(LogLevel::Info, "DNS service stopped.");
+	}
+
+	[[nodiscard]] bool Started() const {
+		return m_running.load(std::memory_order_acquire);
 	}
 
 protected:
@@ -220,23 +241,31 @@ protected:
 
 };
 
-mDNSService::mDNSService(Service service)
-: m_impl(std::make_unique<ServiceImpl>(std::move(service)))
+Service::Service(ServiceSettings settings)
+: m_impl(std::make_unique<ServiceImpl>(std::move(settings)))
 {}
 
-mDNSService::~mDNSService() = default;
+Service::~Service() = default;
 
-void mDNSService::Start()
+void Service::SetSettings(ServiceSettings settings)
+{
+	m_impl->SetSettings(std::move(settings));
+}
+
+void Service::Start()
 {
 	m_impl->Start();
 }
 
-void mDNSService::Stop()
+void Service::Stop()
 {
 	m_impl->Stop();
 }
 
-
+bool Service::Started() const
+{
+	return m_impl->Started();
+}
 
 
 }

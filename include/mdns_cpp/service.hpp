@@ -7,7 +7,7 @@ namespace mdns_cpp
 {
 
 
-struct Service 
+struct ServiceSettings 
 {
     std::string service_name{"_http._tcp.local."};
     std::string hostname{"myhost"}; 
@@ -17,14 +17,17 @@ struct Service
 
 // Wrapper around service_mdns() from mdns.c
 // Provides a mDNS service, answering incoming DNS-SD and mDNS queries
-class mDNSService
+class Service
 {
 public:
-    mDNSService(Service service);
-    ~mDNSService();
+    Service(ServiceSettings settings = ServiceSettings());
+    ~Service();
+    // Not thread safe, call this before Start()
+    void SetSettings(ServiceSettings settings);
 
     void Start();
     void Stop();
+    [[nodiscard]] bool Started() const;
 
 private:
     class ServiceImpl;

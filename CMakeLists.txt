@@ -11,7 +11,7 @@ find_package(Threads REQUIRED)
 
 add_library(mdns_cpp
   src/service_discovery.cpp
-  src/mdns_service.cpp
+  src/service.cpp
   src/types.cpp
 )
 add_library(mdns_cpp::mdns_cpp ALIAS mdns_cpp)

@@ -29,15 +29,17 @@ std::vector<Record> RunServiceDiscovery()
 
 	std::vector<Record> recordsOut;
     std::array<uint8_t, 2048> buffer;
-	size_t num_records; // I have no idea what this is for as it does not 
+	size_t num_records; // I have no idea what this is for as it does not == recordsOut.size()
 
 	// This is a simple implementation that loops for <timeout> seconds or as long as we get replies
 	int numberOfReadyDescriptors;
 	Log(LogLevel::Info, "Reading DNS-SD replies.");
 	do {
+		// Hmm the timout needed seems to depend greatly on the connection quality
+		// devices on 4G can sometimes require 1-2s timeout to discover them
 		struct timeval timeout;
 		timeout.tv_sec = 1;
-		timeout.tv_usec = 0; // With ~1ms, it can still sometimes miss some?
+		timeout.tv_usec = 0;
 
 		int nfds = 0;
 		fd_set readfs;
